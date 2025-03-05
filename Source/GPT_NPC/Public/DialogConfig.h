@@ -36,12 +36,12 @@ struct FCharacterDescription
 
 public:
     /** The main character backstory */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Description")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Description", meta = (MultiLine = "true", LongText = "true"))
     FString MainDescription;
 
     /** Supporting key details */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Description")
-    TArray<FString> SupportingDetails;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Description", meta = (MultiLine = "true", LongText = "true"))
+    TArray<FText> SupportingDetails;
 };
 
 /** Struct for defining NPC edge cases (topics to avoid) */
@@ -52,7 +52,7 @@ struct FCharacterEdgeCase
 
 public:
     /** List of topics that should be avoided */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Edge Cases")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Edge Cases", meta = (MultiLine = "true", LongText = "true"))
     TArray<FString> ForbiddenTopics;
 
     /** Conditional edge cases (e.g., only avoided when a certain trait is high) */
@@ -68,7 +68,7 @@ struct FCharacterDefaults
 
 public:
     /** Default fallback responses */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults", meta = (MultiLine = "true", LongText = "true"))
     TArray<FString> DefaultResponses;
 };
 
