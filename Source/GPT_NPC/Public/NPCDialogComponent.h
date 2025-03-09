@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "DialogConfig.h"
 #include "Components/ActorComponent.h"
+#include "Tasks/HttpGPTChatRequest.h"
+#include "Structures/HttpGPTChatTypes.h"
 #include "NPCDialogComponent.generated.h"
 
 
@@ -26,7 +28,15 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void HandleInput(const FString PlayerInput);
 
+	UFUNCTION()
+	void SendCurrentConversationToGPT();
+
+	UFUNCTION()
+	void OnGPTResponse(const FHttpGPTChatResponse& Response);
 private:
+
+	UPROPERTY()
+	TArray<FHttpGPTChatMessage> ConversationHistory;
 
 	FString PlayerInput_Untailored;
 

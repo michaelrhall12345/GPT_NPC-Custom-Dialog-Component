@@ -87,20 +87,24 @@ class GPT_NPC_API UDialogConfig : public UPrimaryDataAsset
 
 public:
 	UDialogConfig();
-
+ 
+    UFUNCTION()
+    FString ToSystemPrompt() const;
 protected:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category= "Personality|Description")
-    TArray<FCharacterDescription> Description;
+   FCharacterDescription Description;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category= "Personality|Traits")
     TArray<FCharacterTrait> Trait;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category= "Personality|Edge Cases")
-    TArray<FCharacterEdgeCase> EdgeCase;
+    FCharacterEdgeCase EdgeCase;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category= "Personality|Defaults")
-    TArray<FCharacterDefaults> Default;
+    FCharacterDefaults Default;
+
+
 
 
 };
