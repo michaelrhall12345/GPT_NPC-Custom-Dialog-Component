@@ -91,6 +91,8 @@ void UNPCDialogComponent::SendCurrentConversationToGPT()
 
         ChatRequest->ProgressStarted.AddDynamic(this, &UNPCDialogComponent::OnGPTProgressStarted);
         ChatRequest->ProgressUpdated.AddDynamic(this, &UNPCDialogComponent::OnGPTProgressUpdated);
+
+        ChatRequest->Activate(); // GO GO Chat GPT!
     }
     else
     {
