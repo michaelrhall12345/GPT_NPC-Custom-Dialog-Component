@@ -9,6 +9,7 @@
 #include "Structures/HttpGPTChatTypes.h"
 #include "NPCDialogComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPartialTextUpdatedSignature, const FString&, UpdatedText);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GPT_NPC_API UNPCDialogComponent : public UActorComponent
@@ -18,7 +19,9 @@ class GPT_NPC_API UNPCDialogComponent : public UActorComponent
 public:	
 
 	UNPCDialogComponent();
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	UPROPERTY(BlueprintAssignable, Category = "NPC Dialog|Streaming")
+	FOnPartialTextUpdatedSignature OnPartialTextUpdated;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Personality Configuration")
 	UDialogConfig* NPCPersonality;
@@ -48,6 +51,11 @@ protected:
 	void OnGPTProgressUpdated(const FHttpGPTChatResponse& Response);
 	/** End Delegate Binding **/
 
+	// A small helper to broadcast our event
+	void BroadcastPartialText(const FString& NewText);
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Dialog|Streaming")
+	FString CurrentStreamedReply;
 private:
 
 	UPROPERTY()

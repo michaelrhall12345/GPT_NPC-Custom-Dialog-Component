@@ -85,7 +85,7 @@ void UNPCDialogComponent::SendCurrentConversationToGPT()
 
     if (ChatRequest) // Binding delegates so we can handle success or error
     {
-        // ChatRequest->ProcessCompleted.AddDynamic(this, &UNPCDialogComponent::OnGPTProcessCompleted); - @here toggle this in place of OnGPTProgressUpdated to see one large dialog chunk generated after a brief delay.
+        ChatRequest->ProcessCompleted.AddDynamic(this, &UNPCDialogComponent::OnGPTProcessCompleted);
         ChatRequest->ErrorReceived.AddDynamic(this, &UNPCDialogComponent::OnGPTErrorReceived);
 
 
@@ -124,41 +124,6 @@ void UNPCDialogComponent::OnGPTErrorReceived(const FHttpGPTChatResponse& Respons
     UE_LOG(LogTemp, Error, TEXT("GPT Error Delegate Called."));
 }
 
-void UNPCDialogComponent::OnGPTProgressStarted(const FHttpGPTChatResponse& Response)
-{
-    // Ensure stream is empty, then broadcast to delegate 
-    CurrentStreamedReply.Empty();
-    BroadcastPartialText(CurrentStreamedReply);
-    
-    // UE_LOG(LogTemp, Log, TEXT("OnGPTProgressStarted: Streaming has begun!")); @DEBUG
-}
-
-void UNPCDialogComponent::OnGPTProgressUpdated(const FHttpGPTChatResponse& Response)
-{
-    if (Response.Choices.Num() > 0)
-    {
-        const FString SoFarText = Response.Choices[0].Message.Content;
-        int32 OldLen = CurrentStreamedReply.Len();
-        int32 NewLen = SoFarText.Len();
-
-        CurrentStreamedReply = SoFarText;
-        OnPartialTextUpdated.Broadcast(CurrentStreamedReply);
-        // UE_LOG(LogTemp, Log, TEXT("OnGPTProgressUpdated chunk: %s"), *PartialChunk);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("OnGPTProgressUpdated received no choices."));
-    }
-}
-
-void UNPCDialogComponent::BroadcastPartialText(const FString& NewText)
-{
-    CurrentStreamedReply = NewText;
-    OnPartialTextUpdated.Broadcast(NewText);
-}
-
-/*
- * @brief - this function should be toggled if you prefer to see your NPC generate dialog in one large chunk after a brief thinking period. 
 void UNPCDialogComponent::OnGPTProcessCompleted(const FHttpGPTChatResponse& Response)
 {
     UE_LOG(LogTemp, Log, TEXT("OnGPTProcessCompleted: Finished successfully."));
@@ -176,4 +141,43 @@ void UNPCDialogComponent::OnGPTProcessCompleted(const FHttpGPTChatResponse& Resp
 
     BroadcastPartialText(CurrentStreamedReply);
 }
-*/
+
+void UNPCDialogComponent::OnGPTProgressStarted(const FHttpGPTChatResponse& Response)
+{
+    // Ensure stream is empty, then broadcast to delegate 
+    CurrentStreamedReply.Empty();
+    BroadcastPartialText(CurrentStreamedReply);
+    
+    // UE_LOG(LogTemp, Log, TEXT("OnGPTProgressStarted: Streaming has begun!")); @DEBUG
+}
+
+void UNPCDialogComponent::OnGPTProgressUpdated(const FHttpGPTChatResponse& Response)
+{
+    if (Response.Choices.Num() > 0)
+    {
+        const FString PartialChunk = Response.Choices[0].Message.Content;
+        CurrentStreamedReply += PartialChunk;
+        BroadcastPartialText(CurrentStreamedReply);
+
+        // UE_LOG(LogTemp, Log, TEXT("OnGPTProgressUpdated chunk: %s"), *PartialChunk);
+    }
+    else
+    {
+        // UE_LOG(LogTemp, Warning, TEXT("OnGPTProgressUpdated received no choices."));
+    }
+
+    /* @DEBUG 
+    UE_LOG(LogTemp, Log, TEXT("OnGPTProgressUpdated: Got a streamed partial update.")); 
+    if (Response.Choices.Num() > 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Partial text so far: %s"), *Response.Choices[0].Message.Content);
+    }*/
+}
+
+void UNPCDialogComponent::BroadcastPartialText(const FString& NewText)
+{
+    CurrentStreamedReply = NewText;
+    OnPartialTextUpdated.Broadcast(NewText);
+}
+
+
