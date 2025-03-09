@@ -33,6 +33,21 @@ protected:
 
 	UFUNCTION()
 	void OnGPTResponse(const FHttpGPTChatResponse& Response);
+
+	/** Delegate Binding **/
+	UFUNCTION()
+	void OnGPTProcessCompleted(const FHttpGPTChatResponse& Response);
+
+	UFUNCTION()
+	void OnGPTErrorReceived(const FHttpGPTChatResponse& Response);
+
+	UFUNCTION()
+	void OnGPTProgressStarted(const FHttpGPTChatResponse& Response);
+
+	UFUNCTION()
+	void OnGPTProgressUpdated(const FHttpGPTChatResponse& Response);
+	/** End Delegate Binding **/
+
 private:
 
 	UPROPERTY()

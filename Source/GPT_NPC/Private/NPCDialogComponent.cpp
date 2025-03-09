@@ -2,11 +2,11 @@
 
 
 #include "NPCDialogComponent.h"
+#include "Management/HttpGPTSettings.h"
 
 UNPCDialogComponent::UNPCDialogComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
-
+    PrimaryComponentTick.bCanEverTick = false;
 }
 
 
@@ -71,25 +71,32 @@ void UNPCDialogComponent::SendCurrentConversationToGPT()
         return;
     }
 
-    // Call the HttpGPT plugin to send the entire conversation
-    UHttpGPTChatRequest* ChatRequest = UHttpGPTChatRequest::SendMessages_DefaultOptions(
-        GetWorld(),              
-        ConversationHistory,     
-        TArray<FHttpGPTFunction>()  // intentionally empty
-    );
+    const UHttpGPTSettings* GPTSettings = UHttpGPTSettings::Get();
+    if (!GPTSettings)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to get UHttpGPTSettings. Using fallback defaults."));
+        return;
+    }
 
-    if (!ChatRequest)
+    const FHttpGPTCommonOptions& CommonOptions = GPTSettings->CommonOptions;
+    const FHttpGPTChatOptions& ChatOptions = GPTSettings->ChatOptions;
+
+    UHttpGPTChatRequest* ChatRequest = UHttpGPTChatRequest::SendMessages_CustomOptions(GetWorld(), ConversationHistory, TArray<FHttpGPTFunction>(), CommonOptions, ChatOptions);
+
+    if (ChatRequest) // Binding delegates so we can handle success or error
+    {
+        ChatRequest->ProcessCompleted.AddDynamic(this, &UNPCDialogComponent::OnGPTProcessCompleted);
+        ChatRequest->ErrorReceived.AddDynamic(this, &UNPCDialogComponent::OnGPTErrorReceived);
+
+
+        ChatRequest->ProgressStarted.AddDynamic(this, &UNPCDialogComponent::OnGPTProgressStarted);
+        ChatRequest->ProgressUpdated.AddDynamic(this, &UNPCDialogComponent::OnGPTProgressUpdated);
+    }
+    else
     {
         UE_LOG(LogTemp, Error, TEXT("SendCurrentConversationToGPT: Failed to create HttpGPTChatRequest."));
         return;
     }
-
-    // Binding delegates so we can handle success or error
-    ChatRequest->ProcessCompleted.AddDynamic(this, &UNPCDialogComponent::OnGPTResponse);
-
-    // @todo bind to ProgressStarted, ProgressUpdated, etc. if you need streaming updates
-    // ChatRequest->ProgressStarted.AddDynamic(...);
-    // ChatRequest->ProgressUpdated.AddDynamic(...);
 }
 
 void UNPCDialogComponent::OnGPTResponse(const FHttpGPTChatResponse& Response)
@@ -110,7 +117,38 @@ void UNPCDialogComponent::OnGPTResponse(const FHttpGPTChatResponse& Response)
     }
 }
 
+void UNPCDialogComponent::OnGPTErrorReceived(const FHttpGPTChatResponse& Response)
+{
+    UE_LOG(LogTemp, Error, TEXT("GPT Error Delegate Called."));
+}
 
+void UNPCDialogComponent::OnGPTProcessCompleted(const FHttpGPTChatResponse& Response)
+{
+    UE_LOG(LogTemp, Log, TEXT("OnGPTProcessCompleted: Finished successfully."));
+
+    if (Response.Choices.Num() > 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Assistant says: %s"), *Response.Choices[0].Message.Content);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("No choices found in GPT response."));
+    }
+}
+
+void UNPCDialogComponent::OnGPTProgressStarted(const FHttpGPTChatResponse& Response)
+{
+    UE_LOG(LogTemp, Log, TEXT("OnGPTProgressStarted: Streaming has begun!"));
+}
+
+void UNPCDialogComponent::OnGPTProgressUpdated(const FHttpGPTChatResponse& Response)
+{
+    UE_LOG(LogTemp, Log, TEXT("OnGPTProgressUpdated: Got a streamed partial update."));
+    if (Response.Choices.Num() > 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("Partial text so far: %s"), *Response.Choices[0].Message.Content);
+    }
+}
 
 void UNPCDialogComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
