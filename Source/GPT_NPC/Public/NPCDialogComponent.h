@@ -39,9 +39,6 @@ protected:
 
 	/** Delegate Binding **/
 	UFUNCTION()
-	void OnGPTProcessCompleted(const FHttpGPTChatResponse& Response);
-
-	UFUNCTION()
 	void OnGPTErrorReceived(const FHttpGPTChatResponse& Response);
 
 	UFUNCTION()
@@ -49,6 +46,12 @@ protected:
 
 	UFUNCTION()
 	void OnGPTProgressUpdated(const FHttpGPTChatResponse& Response);
+
+	/*
+	UFUNCTION()
+	void OnGPTProcessCompleted(const FHttpGPTChatResponse& Response); - @brief - enable if you want total dialog output 
+	*/
+
 	/** End Delegate Binding **/
 
 	// A small helper to broadcast our event
