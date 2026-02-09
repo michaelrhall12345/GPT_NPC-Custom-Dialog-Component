@@ -1,5 +1,5 @@
 # GPT NPC Custom Dialog Component
-An Unreal Engine component for GPT-powered NPC dialogue. Working on 5.4. Requires a valid OpenAI API key. 
+An Unreal Engine component for GPT-powered NPC dialogue. Working on 5.4. Requires a valid OpenAI API key. For this component to work, you also need to enable to HTTP GPT plugin. 
 
 ## Overview
 This project provides a modular dialog component designed for Unreal Engine projects. This component was developed to enable verbose, accesable dialog for NPCs. You may tweak the given NPCs personality 
