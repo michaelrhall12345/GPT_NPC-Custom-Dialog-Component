@@ -72,3 +72,19 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Added specifically for git push
+Demo/
+*.mkv
+*.mp4
+*.mov
+*.wav
+
+
+# Local demo + heavy art packs
+Demo/
+Content/Scene_Saloon/
+*.mkv
+*.mp4
+*.mov
+
