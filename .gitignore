@@ -88,3 +88,9 @@ Content/Scene_Saloon/
 *.mp4
 *.mov
 
+
+# Secrets
+API Key
+*.env
+*.key
+
